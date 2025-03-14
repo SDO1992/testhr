@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongo:/data/db
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  api:
+    build: ./api
+    container_name: notification-api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - redis
+    # environment:
+    #   - Variabili...
+    #   - ...
+  
+  processor:
+    build: ./processor
+    container_name: notification-processor
+    depends_on:
+      - redis
+      - mongo
+    # environment:
+    #   - Variabili...
+    #   - ...
+
+  dashboard:
+    build: ./dashboard
+    container_name: notification-dashboard
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+      - processor
+  
+  mock-api:
+    build: ./mock-api
+    container_name: mock-api
+    ports:
+      - "1337:1337"
